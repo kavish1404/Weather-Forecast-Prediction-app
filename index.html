@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Forecast Prediction</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Weather Forecast Prediction</h1>
+        <form id="predictionForm" onsubmit="return false;">
+            <input type="number" step="any" placeholder="Dew Point Temp (°C)" id="dewPoint" required>
+            <input type="number" step="any" placeholder="Relative Humidity (%)" id="humidity" required>
+            <input type="number" step="any" placeholder="Wind Speed (km/h)" id="windSpeed" required>
+            <input type="number" step="any" placeholder="Visibility (km)" id="visibility" required>
+            <input type="number" step="any" placeholder="Pressure (kPa)" id="pressure" required>
+            <input type="number" step="any" placeholder="Weather Encoded" id="weather" required>
+            <button type="button" onclick="submitForm()">Predict</button>
+        </form>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        async function submitForm() {
+            const dewPoint = parseFloat(document.getElementById('dewPoint').value);
+            const humidity = parseFloat(document.getElementById('humidity').value);
+            const windSpeed = parseFloat(document.getElementById('windSpeed').value);
+            const visibility = parseFloat(document.getElementById('visibility').value);
+            const pressure = parseFloat(document.getElementById('pressure').value);
+            const weatherEncoded = parseFloat(document.getElementById('weather').value);
+
+            const data = [{
+                "Dew Point Temp_C": dewPoint,
+                "Rel Hum_%": humidity,
+                "Wind Speed_km/h": windSpeed,
+                "Visibility_km": visibility,
+                "Press_kPa": pressure,
+                "Weather_encoded": weatherEncoded
+            }];
+            try {
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                const outputDiv = document.getElementById('result');
+
+                if (result.predictions) {
+                    outputDiv.innerText = `Predicted Temperature: ${result.predictions[0]} °C`;
+                } else {
+                    outputDiv.innerText = `Error: ${result.error || "Unexpected error occurred."}`;
+                }
+            } catch (error) {
+                document.getElementById('result').innerText = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
